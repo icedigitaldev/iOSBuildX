@@ -70,6 +70,11 @@ cp app.env.example app.env     # tu app y los ids de tu cuenta de Apple
 y en `signing/`: `dist.key`, `dist.cer`, tu `.mobileprovision` y tu `AuthKey_*.p8`.
 Ni `app.env` ni `signing/` se versionan.
 
+`MIN_OS` es el iOS mínimo de tu app y es **un solo número para todo**: el resolver de
+CocoaPods, el `-target` de cada pod y el `MinimumOSVersion` del bundle. 15.0 es el suelo
+que Apple exigirá desde 2027; súbelo solo si una dependencia lo pide, y el propio script
+te dirá cuál.
+
 ## Compilar
 
 Empaqueta el código desde tu máquina y déjalo en `out/`:
@@ -122,6 +127,7 @@ La versión sale del `pubspec.yaml`: `version: 0.8.6+21` → versión 0.8.6, bui
 | `21-podbuild.py` | compila esas dependencias a objetos arm64 |
 | `30-build.sh` | compila la app |
 | `40-sign.sh` | compila, firma y valida |
+| `02-minos.py` | ajusta el `MinimumOSVersion` que hatch lleva fijo en 13.4 |
 | `50-asc.py` | qué versiones y builds hay ya en App Store Connect |
 | `release.sh` | los anteriores en orden, que es lo que usarás |
 
@@ -136,6 +142,8 @@ firmando algo distinto de lo que compilaste.
 | síntoma | causa |
 |---|---|
 | `pub` no resuelve nunca | la VM se creó sin `--net-backend virtio-net` |
+| `could not find compatible versions for pod X` | algún pod exige un iOS mínimo mayor que tu `MIN_OS`; el propio script te lo dice y la solución es subirlo en `app.env` |
+| Apple responde **ITMS-90068** | tu `MIN_OS` es menor de 15.0, que es lo que Apple exigirá desde 2027 |
 | `frontend_server` sale con **254** | hatch copia `package_config.json` sin absolutizar el `rootUri` del propio paquete; `env.sh` lo reescribe en cada build |
 | un pod falla al compilar | su log está en `/root/iospoc/work/<App>/plugout/pod_<Pod>.log`, con el comando exacto en la primera línea |
 | `framework not found for -framework X` | el framework de X no llegó al directorio de frameworks: mirar el log de ese pod |

@@ -19,10 +19,17 @@ project  = ARGV[0] or abort "uso: 20-podgraph.rb <proyecto> [salida.json]"
 outfile  = ARGV[1] || '/out/podgraph.json'
 ios_dir  = File.join(project, 'ios')
 
-platform_version = '13.0'
+# El minimo sale de MIN_OS, no del Podfile: si cada sitio trae el suyo acabas con
+# los pods compilados para una version y la app declarando otra.
 podfile_path = File.join(ios_dir, 'Podfile')
-if File.exist?(podfile_path) && (m = File.read(podfile_path).match(/platform\s+:ios,\s*'([\d.]+)'/))
-  platform_version = m[1]
+platform_version = ENV['MIN_OS']
+if platform_version.nil? || platform_version.empty?
+  platform_version =
+    if File.exist?(podfile_path) && (m = File.read(podfile_path).match(/platform\s+:ios,\s*'([\d.]+)'/))
+      m[1]
+    else
+      '15.0'
+    end
 end
 
 # Los plugins declaran dependency 'Flutter'; el engine lo aporta hatch, asi que
@@ -83,7 +90,17 @@ sandbox   = Pod::Sandbox.new(File.join(ios_dir, 'Pods'))
 installer = Pod::Installer.new(sandbox, podfile, nil)
 installer.repo_update = false
 installer.update      = false
-installer.install!
+begin
+  installer.install!
+rescue Molinillo::VersionConflict, Pod::Informative => e
+  msg = e.message
+  if msg =~ /deployment target|platform|compatible versions/i
+    warn "
+!! CocoaPods no pudo resolver con iOS #{platform_version}."
+    warn "!! Suele ser un pod que exige un minimo mayor: sube MIN_OS en app.env."
+  end
+  raise
+end
 
 # El arbol Headers/Public al que apuntan los HEADER_SEARCH_PATHS lo monta
 # CocoaPods junto con el proyecto; sin proyecto hay que pedirlo a mano.

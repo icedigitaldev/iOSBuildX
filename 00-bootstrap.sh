@@ -23,7 +23,7 @@ bash /out/01-base.sh || exit 1
 # clon superficial: sin este tag, flutter --version se baja 1,1 M objetos
 git -C /opt/flutter tag -f "$(cat /opt/flutter/version)" HEAD >/dev/null 2>&1
 
-log "2/10 hatch + plugin hatch-ios"
+log "2/10 hatch + plugin hatch-ios (MinimumOSVersion a MIN_OS)"
 bash /out/02-hatch.sh
 
 log "3/10 SDK de la macVM + cctools/ld64 + rcodesign"

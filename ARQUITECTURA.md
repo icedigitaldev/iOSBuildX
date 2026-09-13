@@ -136,6 +136,16 @@ al pod Swift sin interfaz para sus consumidores ObjC.
 el prefix header precompilado de Xcode y no importan nada; ponérselo a uno de C puro
 (nanopb) rompe su módulo en cuanto se construye desde un `.c`.
 
+**El mínimo de iOS sale de `MIN_OS` y de ningún otro sitio.** hatch lo lleva fijo en 13.4
+dentro del binario —no mira el `AppFrameworkInfo.plist`, ni el `.xcodeproj`, ni el engine—
+y no es configurable: el esquema de `~/.hatch/ios.json` solo acepta `asc`, `signing`,
+`team_id`, `bundle_id`, `wsl_distro` y `toolchain_root`. Con 13.4 App Store Connect avisa
+con ITMS-90068 y a partir de 2027 rechazará por debajo de 15.0. `02-minos.py` cambia ese
+valor en sitio (es un inmediato de 4 bytes, misma longitud) y `env.sh` lo reajusta en cada
+build, así que el binario nunca se desincroniza de `MIN_OS`. El mismo número va al
+resolver de CocoaPods y al `-target` de cada pod: si viniera de tres sitios distintos
+acabarías con los pods compilados para una versión y la app declarando otra.
+
 **Los pods Swift se compilan con `-parse-as-library`.** Sin eso, un pod de un solo fichero
 se compila en modo script y emite un `main` que choca con el del Runner.
 
@@ -152,8 +162,4 @@ se compila en modo script y emite un `main` que choca con el del Runner.
   esa sería la mejora más clara.
 - **`script_phases` de los pods no se ejecutan** (se avisa en el resumen). Ninguno de los
   43 de Educanet las usa.
-- **`MinimumOSVersion` fijo en 13.4**: hatch lo lleva hardcodeado en el binario y no mira
-  el proyecto, aunque este diga 15.0 en `AppFrameworkInfo.plist`, en el `.xcodeproj` y en
-  el propio engine. Apple lo acepta pero avisa (ITMS-90068) y a partir de 2027 exigirá
-  15.0. Tampoco es configurable: el esquema de `~/.hatch/ios.json` solo tiene `asc`,
-  `signing`, `team_id`, `bundle_id`, `wsl_distro` y `toolchain_root`.
+

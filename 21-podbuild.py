@@ -70,11 +70,14 @@ def sh(cmd, log):
 
 
 def load_graph():
-    """El grafo se rehace solo si cambio la lista de plugins: si no, una app con
-    una dependencia nueva se compilaria contra el grafo viejo sin avisar."""
+    """El grafo se rehace solo si cambio la lista de plugins o el minimo de iOS:
+    si no, se compilaria contra el grafo viejo sin avisar."""
     stamp = os.path.join(PROJECT, ".flutter-plugins-dependencies")
     fresh = (os.path.exists(GRAPH) and os.path.exists(stamp)
              and os.path.getmtime(GRAPH) >= os.path.getmtime(stamp))
+    if fresh and os.environ.get("MIN_OS"):
+        # el minimo tambien decide que versiones resuelve CocoaPods
+        fresh = json.load(open(GRAPH))["ios_deployment"] == os.environ["MIN_OS"]
     if not fresh or os.environ.get("HATCH_IOS_REANALYZE"):
         subprocess.run(["ruby", ANALYZER, PROJECT, GRAPH], check=True)
         # cambio el grafo: lo construido antes ya no corresponde. Dejarlo seria
