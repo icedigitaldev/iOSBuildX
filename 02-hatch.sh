@@ -14,5 +14,5 @@ which hatch hatch-ios || true
 hatch --version || true
 hatch-ios --help || true
 # el MinimumOSVersion viene fijo en 13.4 y Apple exigirá 15.0 desde 2027
-python3 /out/02-minos.py "${MIN_OS:-15.0}"
+python3 /out/02-minos.py "${MIN_OS:-16.0}"
 echo "=== HATCH INSTALLED ==="

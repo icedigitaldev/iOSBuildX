@@ -14,7 +14,7 @@ export HATCH_IOS_CLANG_RT_DIR=$XC/usr/lib/clang/17/lib/darwin
 export HATCH_IOS_FB_DIR=/root/iospoc/fw/$NAME
 
 # hatch lleva el MinimumOSVersion fijo; que siga a MIN_OS sin recordarlo
-python3 /out/02-minos.py "${MIN_OS:-15.0}" >/dev/null
+python3 /out/02-minos.py "${MIN_OS:-16.0}" >/dev/null
 
 # hatch copia package_config.json al work dir sin absolutizar el rootUri del
 # propio paquete, y entonces el frontend_server sale con 254

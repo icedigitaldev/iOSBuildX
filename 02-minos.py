@@ -10,11 +10,11 @@ con ITMS-90068, y desde la primavera de 2027 exigirá 15.0 o superior.
 El valor viaja como un inmediato de 4 bytes en el código, así que se cambia en
 sitio por otro de la misma longitud. Idempotente: si ya está puesto, no toca nada.
 
-    python3 02-minos.py 15.0 [/usr/local/bin/hatch-ios]
+    python3 02-minos.py 16.0 [/usr/local/bin/hatch-ios]
 """
 import os, re, sys
 
-TARGET = (sys.argv[1] if len(sys.argv) > 1 else "15.0").encode()
+TARGET = (sys.argv[1] if len(sys.argv) > 1 else "16.0").encode()
 BINARY = sys.argv[2] if len(sys.argv) > 2 else "/usr/local/bin/hatch-ios"
 
 if not re.fullmatch(rb"[0-9]{2}\.[0-9]", TARGET):

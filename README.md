@@ -71,9 +71,10 @@ y en `signing/`: `dist.key`, `dist.cer`, tu `.mobileprovision` y tu `AuthKey_*.p
 Ni `app.env` ni `signing/` se versionan.
 
 `MIN_OS` es el iOS mínimo de tu app y es **un solo número para todo**: el resolver de
-CocoaPods, el `-target` de cada pod y el `MinimumOSVersion` del bundle. 15.0 es el suelo
-que Apple exigirá desde 2027; súbelo solo si una dependencia lo pide, y el propio script
-te dirá cuál.
+CocoaPods, el `-target` de cada pod y el `MinimumOSVersion` del bundle. Por defecto 16.0.
+El suelo que Apple exigirá desde 2027 es 15.0, así que 16.0 deja margen; bajarlo a 15.0 es
+válido y suma iPhone 6s, 7 y SE 1ª gen. Si una dependencia pide más, el propio script te
+dice cuál.
 
 ## Compilar
 

@@ -28,7 +28,7 @@ if platform_version.nil? || platform_version.empty?
     if File.exist?(podfile_path) && (m = File.read(podfile_path).match(/platform\s+:ios,\s*'([\d.]+)'/))
       m[1]
     else
-      '15.0'
+      '16.0'
     end
 end
 
