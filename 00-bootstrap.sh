@@ -8,13 +8,13 @@
 #   smolvm machine exec --name hatch -- bash /out/00-bootstrap.sh
 #
 # Idempotente: cada paso se salta si ya esta hecho. Necesita en /out/vendor los
-# dos tarballs sacados de la macVM (ver ARQUITECTURA.md).
+# dos tarballs y los dos plist sacados de la macVM (ver ARQUITECTURA.md).
 set -uo pipefail
 export DEBIAN_FRONTEND=noninteractive
 log() { echo; echo "=== $* ==="; }
 
 cd /out || { echo "falta el volumen /out"; exit 1; }
-for f in iPhoneOS26.2.sdk.tar.gz xcode-darwin-roots.tar.gz; do
+for f in iPhoneOS26.2.sdk.tar.gz xcode-darwin-roots.tar.gz xcode-version.plist macos-SystemVersion.plist; do
   [ -f "/out/vendor/$f" ] || { echo "FALTA /out/vendor/$f (sacarlo de la macVM)"; exit 1; }
 done
 

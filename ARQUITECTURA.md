@@ -37,7 +37,7 @@ Tres piezas, cada una cubre el hueco de la otra:
 
 ## Qué sale de la macVM
 
-Dos tarballs, una vez, a `vendor/`. No hace falta `Xcode.xip`.
+Dos tarballs y dos plist, una vez, a `vendor/`. No hace falta `Xcode.xip`.
 
 ```bash
 # SDK. OJO: iPhoneOS26.2.sdk es un symlink; hay que empaquetar el real       (32 MB)
@@ -45,6 +45,10 @@ ssh mac 'cd /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platfo
 
 # resource dirs del toolchain + frameworks del platform                      (622 MB)
 ssh mac 'cd /Applications/Xcode.app/Contents/Developer && tar cf - Toolchains/XcodeDefault.xctoolchain/usr/lib/swift Toolchains/XcodeDefault.xctoolchain/usr/lib/clang Toolchains/XcodeDefault.xctoolchain/usr/include Platforms/iPhoneOS.platform/Developer/Library/Frameworks Platforms/iPhoneOS.platform/Developer/Library/PrivateFrameworks Platforms/iPhoneOS.platform/Developer/usr/lib | gzip -1' > C:\ruta\a\este\repo\vendor\xcode-darwin-roots.tar.gz
+
+# versión de Xcode y del macOS que lo tiene, para los DT* del Info.plist
+ssh mac 'cat /Applications/Xcode.app/Contents/version.plist' > C:\ruta\a\este\repo\vendor\xcode-version.plist
+ssh mac 'cat /System/Library/CoreServices/SystemVersion.plist' > C:\ruta\a\este\repo\vendor\macos-SystemVersion.plist
 ```
 
 `00-bootstrap.sh` deja el toolchain en `/root/iospoc`:
@@ -149,14 +153,22 @@ acabarías con los pods compilados para una versión y la app declarando otra.
 **Los pods Swift se compilan con `-parse-as-library`.** Sin eso, un pod de un solo fichero
 se compila en modo script y emite un `main` que choca con el del Runner.
 
+**El SDK y el Xcode del `Info.plist` salen de los ficheros de Apple, no de hatch.** hatch
+estampa `DTSDKBuild=23A340` y `DTXcodeBuild=17A324` fijos: el primero es el iOS 26.0 RC
+de dispositivo, que ningún Xcode público llevó como SDK, y App Store Connect lo cataloga
+como beta y no deja mandar el build a revisión (TestFlight sí lo acepta, así que el fallo
+aparece tarde). Son constantes del código Rust, de longitud distinta a las reales, así que
+no se parchean como el `MinimumOSVersion`: `40-sign.sh` compila sin firmar, `41-stamp.py`
+reescribe los `DT*` y `BuildMachineOSBuild` con lo que dicen `SystemVersion.plist` y
+`SDKSettings.json` del SDK, el `version.plist` de Xcode y el `SystemVersion.plist` del
+macOS —los mismos ficheros que consulta Xcode— y alinea el campo `sdk` de
+`LC_BUILD_VERSION` de cada Mach-O, y después se firma igual que lo hace hatch.
+
 ## Lo que falta
 
 - **Assets.car**: hatch no tiene `actool`; usa un catálogo donante y da por hecho el
   iconset de 25 entradas que genera `flutter_launcher_icons`. Una app con otro catálogo,
   storyboards o app extensions puede descubrir otro hueco.
-- **Metadatos de Apple hardcodeados en hatch**: el binario lleva `SDK_VER=26.0`,
-  `SDK_BUILD=23A340`, `XCODE_BUILD=17A324`. El SDK real es 26.2. Hoy pasa validación, pero
-  lo duradero es leerlos del `SDKSettings` del SDK.
 - **La subida** va por `iris`, la API privada de Transporter que hatch sacó por ingeniería
   inversa. Apple ya publicó `POST /v1/buildUploads` + `buildUploadFiles` oficial; migrar a
   esa sería la mejora más clara.

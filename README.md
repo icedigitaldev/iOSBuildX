@@ -30,8 +30,8 @@ El `--net-backend virtio-net` no es opcional: con el backend por defecto los soc
 Dart fallan con `errno 107` y `pub` no resuelve nunca.
 
 **El SDK de iOS y los resource dirs de Xcode**, que no se pueden redistribuir. Salen de tu
-propia instalación de Xcode, en un Mac o en una VM macOS tuya. Dos tarballs, una sola vez,
-a `vendor/`:
+propia instalación de Xcode, en un Mac o en una VM macOS tuya. Dos tarballs y dos plist,
+una sola vez, a `vendor/`:
 
 ```bash
 # el SDK; iPhoneOS<versión>.sdk suele ser un symlink, hay que empaquetar el real   (32 MB)
@@ -47,6 +47,11 @@ tar czf xcode-darwin-roots.tar.gz \
   Platforms/iPhoneOS.platform/Developer/Library/Frameworks \
   Platforms/iPhoneOS.platform/Developer/Library/PrivateFrameworks \
   Platforms/iPhoneOS.platform/Developer/usr/lib
+
+# versión de Xcode y del macOS que lo tiene: van al Info.plist como DTXcode/DTXcodeBuild
+# y BuildMachineOSBuild, que App Store Connect coteja contra los Xcode públicos
+cp /Applications/Xcode.app/Contents/version.plist xcode-version.plist
+cp /System/Library/CoreServices/SystemVersion.plist macos-SystemVersion.plist
 ```
 
 **Una cuenta de Apple Developer** con un certificado de distribución, un perfil y una API
@@ -127,7 +132,8 @@ La versión sale del `pubspec.yaml`: `version: 0.8.6+21` → versión 0.8.6, bui
 | `20-podgraph.rb` | resuelve las dependencias con CocoaPods → `podgraph.json` |
 | `21-podbuild.py` | compila esas dependencias a objetos arm64 |
 | `30-build.sh` | compila la app |
-| `40-sign.sh` | compila, firma y valida |
+| `40-sign.sh` | compila, estampa el SDK y el Xcode reales, firma y valida |
+| `41-stamp.py` | escribe en el `Info.plist` y en `LC_BUILD_VERSION` la versión real del SDK y de Xcode |
 | `02-minos.py` | ajusta el `MinimumOSVersion` que hatch lleva fijo en 13.4 |
 | `50-asc.py` | qué versiones y builds hay ya en App Store Connect |
 | `release.sh` | los anteriores en orden, que es lo que usarás |
@@ -144,6 +150,7 @@ firmando algo distinto de lo que compilaste.
 |---|---|
 | `pub` no resuelve nunca | la VM se creó sin `--net-backend virtio-net` |
 | `could not find compatible versions for pod X` | algún pod exige un iOS mínimo mayor que tu `MIN_OS`; el propio script te lo dice y la solución es subirlo en `app.env` |
+| en revisión: *las apps deben compilarse con las versiones públicas (GM) de Xcode* | el `Info.plist` lleva un SDK/Xcode que no existe como público; lo corrige `41-stamp.py` y falla si faltan los plist de `vendor/` |
 | Apple responde **ITMS-90068** | tu `MIN_OS` es menor de 15.0, que es lo que Apple exigirá desde 2027 |
 | `frontend_server` sale con **254** | hatch copia `package_config.json` sin absolutizar el `rootUri` del propio paquete; `env.sh` lo reescribe en cada build |
 | un pod falla al compilar | su log está en `/root/iospoc/work/<App>/plugout/pod_<Pod>.log`, con el comando exacto en la primera línea |
