@@ -1,0 +1,8 @@
+# tu app y tu cuenta de Apple
+app.env
+# certificados, perfil y API key
+signing/
+# tarballs del SDK y del toolchain
+vendor/
+# salida de cada build
+out/
