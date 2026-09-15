@@ -17,8 +17,7 @@ tidy() {
   sed -u -E \
     -e '/Woah! You appear to be trying to run flutter as root|superuser privileges|Sign later with:/d' \
     -e '/^(signing |entering nested bundle|leaving nested bundle|creating cryptographic signature|automatically |registering signing key|using time-stamp|setting entitlements|Frameworks\/[^ ]+\.framework$)/d' \
-    -e '/^[[:space:]]*[-|\/]?[[:space:]]*(📎)?[[:space:]]*$/d' \
-    -e 's/^([[:space:]]*)(✅|📦|🎨|🧩|🔨|🔍|📤|🔎|📎|⚠️|❌|🚀|✨|🎉)[[:space:]]*/\1/'
+    -e '/^[[:space:]]*[-|\/]?[[:space:]]*(📎)?[[:space:]]*$/d'
 }
 
 # gen_snapshot con target iOS
