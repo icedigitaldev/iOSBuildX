@@ -13,6 +13,18 @@ export HATCH_IOS_SWIFT_COMPAT_DIR=$XC/usr/lib/swift/iphoneos
 export HATCH_IOS_CLANG_RT_DIR=$XC/usr/lib/clang/17/lib/darwin
 export HATCH_IOS_FB_DIR=/root/iospoc/fw/$NAME
 
+# gen_snapshot con target iOS
+GS_IOS=/out/vendor/gen_snapshot-ios
+GS=/root/iospoc/engine/gs-linux/gen_snapshot
+[ -f "$GS_IOS" ] || { echo "falta $GS_IOS (ver 11-gensnapshot.sh)"; exit 1; }
+DART_ENG=$(cat /root/iospoc/engine/dart-sdk/version 2>/dev/null)
+DART_GS=$("$GS_IOS" --version 2>&1 | awk '{print $4}')
+[ "$DART_ENG" = "$DART_GS" ] || {
+  echo "gen_snapshot-ios es de Dart $DART_GS y el engine de Dart $DART_ENG: recompílalo con 11-gensnapshot.sh"
+  exit 1
+}
+cmp -s "$GS_IOS" "$GS" || install -m 755 "$GS_IOS" "$GS"
+
 # hatch lleva el MinimumOSVersion fijo; que siga a MIN_OS sin recordarlo
 python3 /out/02-minos.py "${MIN_OS:-16.0}" >/dev/null
 

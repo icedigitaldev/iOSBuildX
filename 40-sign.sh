@@ -58,6 +58,16 @@ IPA="${UNSIGNED%.ipa}-signed.ipa"
 WORK=$(mktemp -d)
 unzip -oq "$UNSIGNED" -d "$WORK" || exit 1
 BUNDLE_APP=$(ls -d "$WORK"/Payload/*.app | head -1)
+
+python3 - "$BUNDLE_APP/Frameworks/App.framework/App" <<'PY' || exit 1
+import sys
+d = open(sys.argv[1], "rb").read()
+i = d.find(b"\xf5\xf5\xdc\xdc")
+feat = d[i + 52:i + 400].split(b"\0")[0].decode() if i >= 0 else ""
+if " ios " not in f" {feat} " or " compressed-pointers" in f" {feat}":
+    sys.exit(f"el snapshot Dart no es de iOS: '{feat}'")
+print(">> snapshot Dart:", feat)
+PY
 python3 /out/41-stamp.py "$BUNDLE_APP" /root/iospoc/iossdk/iPhoneOS26.2.sdk \
   /out/vendor/xcode-version.plist /out/vendor/macos-SystemVersion.plist || exit 1
 

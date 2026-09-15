@@ -113,6 +113,13 @@ que exija el pod más nuevo), igual que hace el `post_install` de Flutter.
 
 ## Las decisiones que no son obvias
 
+**El `gen_snapshot` es de iOS.** El snapshot AOT declara sistema operativo y punteros
+comprimidos (`arm64 ios no-compressed-pointers`) y tiene que coincidir con el
+`Flutter.framework`. Flutter publica ese `gen_snapshot` solo para macOS, así que
+`11-gensnapshot.sh` lo compila para Linux desde el Dart SDK con `target_os` fijado a iOS en
+`dart_os_config`. `env.sh` lo instala en cada build y `40-sign.sh` verifica las features del
+`App.framework`.
+
 **La versión de Swift la manda el SDK, no el Xcode.** Xcode 26.3 reporta Swift 6.2.4, pero
 los `.swiftinterface` del SDK 26.2 los construyó swiftlang-6.2.3.3.2: hay que instalar
 **Swift 6.2.3**. Si no coincide: *"this SDK is not supported by the compiler"*.

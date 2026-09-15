@@ -54,6 +54,11 @@ cp /Applications/Xcode.app/Contents/version.plist xcode-version.plist
 cp /System/Library/CoreServices/SystemVersion.plist macos-SystemVersion.plist
 ```
 
+**Un `gen_snapshot` con target iOS** para Linux, en `vendor/gen_snapshot-ios`. Flutter
+solo lo publica para macOS; `11-gensnapshot.sh` lo compila desde el Dart SDK en la
+revisión que fija tu versión de Flutter (~20 min, ~8 GB de disco, en cualquier Linux
+x86_64). Hay que repetirlo al cambiar de versión de Flutter; `env.sh` avisa si no coincide.
+
 **Una cuenta de Apple Developer** con un certificado de distribución, un perfil y una API
 key de App Store Connect.
 
@@ -129,6 +134,7 @@ La versión sale del `pubspec.yaml`: `version: 0.8.6+21` → versión 0.8.6, bui
 |---|---|
 | `00-bootstrap.sh` | monta el toolchain entero; llama a los `01`–`09` |
 | `10-sync.sh` | mete el código en la VM y adapta las rutas locales |
+| `11-gensnapshot.sh` | compila el `gen_snapshot` de iOS para Linux → `vendor/gen_snapshot-ios` |
 | `20-podgraph.rb` | resuelve las dependencias con CocoaPods → `podgraph.json` |
 | `21-podbuild.py` | compila esas dependencias a objetos arm64 |
 | `30-build.sh` | compila la app |
