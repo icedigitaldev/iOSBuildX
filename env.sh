@@ -32,6 +32,11 @@ DART_GS=$("$GS_IOS" --version 2>&1 | awk '{print $4}')
 }
 cmp -s "$GS_IOS" "$GS" || install -m 755 "$GS_IOS" "$GS"
 
+# frontend server con el registrante de plugins Dart
+AOTRT=/root/iospoc/engine/dart-sdk/bin/dartaotruntime
+[ "$(head -c 2 "$AOTRT")" = "#!" ] || mv -f "$AOTRT" "$AOTRT.real"
+cmp -s /out/frontend_server.sh "$AOTRT" || install -m 755 /out/frontend_server.sh "$AOTRT"
+
 # hatch lleva el MinimumOSVersion fijo; que siga a MIN_OS sin recordarlo
 python3 /out/02-minos.py "${MIN_OS:-16.0}" >/dev/null
 

@@ -120,6 +120,15 @@ comprimidos (`arm64 ios no-compressed-pointers`) y tiene que coincidir con el
 `dart_os_config`. `env.sh` lo instala en cada build y `40-sign.sh` verifica las features del
 `App.framework`.
 
+**El kernel lleva el registrante de plugins Dart.** Un plugin federado registra su
+implementación de iOS desde Dart (`path_provider_foundation`, `sqflite_darwin`,
+`url_launcher_ios`, `google_sign_in_ios`...), y quien lo llama es el archivo que genera
+`flutter build` en `.dart_tool/flutter_build/dart_plugin_registrant.dart`. Si no se pasa al
+frontend server, el plugin no queda registrado y la primera llamada termina en
+`MissingPluginException`, que en el arranque deja la app sin dibujar nada. hatch no lo pasa,
+así que `env.sh` instala `frontend_server.sh` en lugar del `dartaotruntime` del engine y
+añade `--source` y `-Dflutter.dart_plugin_registrant` igual que `flutter build`.
+
 **La versión de Swift la manda el SDK, no el Xcode.** Xcode 26.3 reporta Swift 6.2.4, pero
 los `.swiftinterface` del SDK 26.2 los construyó swiftlang-6.2.3.3.2: hay que instalar
 **Swift 6.2.3**. Si no coincide: *"this SDK is not supported by the compiler"*.
@@ -179,6 +188,10 @@ macOS —los mismos ficheros que consulta Xcode— y alinea el campo `sdk` de
 - **La subida** va por `iris`, la API privada de Transporter que hatch sacó por ingeniería
   inversa. Apple ya publicó `POST /v1/buildUploads` + `buildUploadFiles` oficial; migrar a
   esa sería la mejora más clara.
+- **Los hooks de build de Dart (native assets) no se ejecutan**: `NativeAssetsManifest.json`
+  sale vacío. Un paquete que compile código nativo por esa vía necesitaría correr los hooks
+  con el clang cruzado, un `xcrun` que apunte al SDK, y empaquetar y firmar los dylibs que
+  generen. Ningún plugin de los que se han probado lo usa.
 - **`script_phases` de los pods no se ejecutan** (se avisa en el resumen). Ninguno de los
   43 de Educanet las usa.
 

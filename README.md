@@ -135,6 +135,7 @@ La versión sale del `pubspec.yaml`: `version: 0.8.6+21` → versión 0.8.6, bui
 | `00-bootstrap.sh` | monta el toolchain entero; llama a los `01`–`09` |
 | `10-sync.sh` | mete el código en la VM y adapta las rutas locales |
 | `11-gensnapshot.sh` | compila el `gen_snapshot` de iOS para Linux → `vendor/gen_snapshot-ios` |
+| `frontend_server.sh` | pasa el registrante de plugins Dart al compilar el kernel |
 | `20-podgraph.rb` | resuelve las dependencias con CocoaPods → `podgraph.json` |
 | `21-podbuild.py` | compila esas dependencias a objetos arm64 |
 | `30-build.sh` | compila la app |
@@ -162,6 +163,7 @@ firmando algo distinto de lo que compilaste.
 | un pod falla al compilar | su log está en `/root/iospoc/work/<App>/plugout/pod_<Pod>.log`, con el comando exacto en la primera línea |
 | `framework not found for -framework X` | el framework de X no llegó al directorio de frameworks: mirar el log de ese pod |
 | `duplicate symbol: main` | un pod Swift de un solo fichero compilado sin `-parse-as-library` |
+| `MissingPluginException` en un plugin federado | falta el registrante de plugins Dart: `env.sh` instala `frontend_server.sh` en cada build |
 | `rcodesign.exe not found` | hatch lo busca en `<root>/rcodesign029`; el enlace lo deja `03-toolchain.sh` |
 
 ## Más
