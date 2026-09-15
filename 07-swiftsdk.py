@@ -47,4 +47,4 @@ json.dump({
         }
     },
 }, open(os.path.join(DST, "darwin-ios", "swift-sdk.json"), "w"), indent=2)
-print("bundle en", DST, "| linker:", LD)
+print("Swift SDK bundle:", DST, "linker:", LD)

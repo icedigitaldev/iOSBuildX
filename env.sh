@@ -3,7 +3,7 @@
 # firmando algo distinto de lo que compilaste.
 export PATH=/opt/flutter/bin:/root/iospoc/darwin-bin:/usr/local/bin:$PATH
 
-[ -f /out/app.env ] || { echo "falta /out/app.env (copia app.env.example)"; exit 1; }
+[ -f /out/app.env ] || { echo "error: missing /out/app.env (see app.env.example)"; exit 1; }
 set -a
 . /out/app.env
 set +a
@@ -13,14 +13,22 @@ export HATCH_IOS_SWIFT_COMPAT_DIR=$XC/usr/lib/swift/iphoneos
 export HATCH_IOS_CLANG_RT_DIR=$XC/usr/lib/clang/17/lib/darwin
 export HATCH_IOS_FB_DIR=/root/iospoc/fw/$NAME
 
+tidy() {
+  sed -u -E \
+    -e '/Woah! You appear to be trying to run flutter as root|superuser privileges|Sign later with:/d' \
+    -e '/^(signing |entering nested bundle|leaving nested bundle|creating cryptographic signature|automatically |registering signing key|using time-stamp|setting entitlements|Frameworks\/[^ ]+\.framework$)/d' \
+    -e '/^[[:space:]]*[-|\/]?[[:space:]]*(📎)?[[:space:]]*$/d' \
+    -e 's/^([[:space:]]*)(✅|📦|🎨|🧩|🔨|🔍|📤|🔎|📎|⚠️|❌|🚀|✨|🎉)[[:space:]]*/\1/'
+}
+
 # gen_snapshot con target iOS
 GS_IOS=/out/vendor/gen_snapshot-ios
 GS=/root/iospoc/engine/gs-linux/gen_snapshot
-[ -f "$GS_IOS" ] || { echo "falta $GS_IOS (ver 11-gensnapshot.sh)"; exit 1; }
+[ -f "$GS_IOS" ] || { echo "error: missing $GS_IOS (see 11-gensnapshot.sh)"; exit 1; }
 DART_ENG=$(cat /root/iospoc/engine/dart-sdk/version 2>/dev/null)
 DART_GS=$("$GS_IOS" --version 2>&1 | awk '{print $4}')
 [ "$DART_ENG" = "$DART_GS" ] || {
-  echo "gen_snapshot-ios es de Dart $DART_GS y el engine de Dart $DART_ENG: recompílalo con 11-gensnapshot.sh"
+  echo "error: gen_snapshot-ios targets Dart $DART_GS but the engine uses Dart $DART_ENG (rebuild with 11-gensnapshot.sh)"
   exit 1
 }
 cmp -s "$GS_IOS" "$GS" || install -m 755 "$GS_IOS" "$GS"

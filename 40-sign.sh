@@ -9,7 +9,7 @@ SIG=/root/iospoc/signing
 S=/out/signing
 
 for f in dist.key dist.cer "$PROFILE" "$ASC_KEY"; do
-  [ -f "$S/$f" ] || { echo "falta $S/$f"; exit 1; }
+  [ -f "$S/$f" ] || { echo "error: missing $S/$f"; exit 1; }
 done
 
 mkdir -p "$SIG"
@@ -46,10 +46,10 @@ json.dump(cfg, open(p, "w"), indent=2)
 PY
 
 cd "$APP" || exit 1
-hatch ios build --bundle-id "$BUNDLE" --name "$NAME" || exit 1
+hatch ios build --bundle-id "$BUNDLE" --name "$NAME" 2>&1 | tidy || exit 1
 
 UNSIGNED=$(ls -t "$APP"/build/ios/hatch/*.ipa 2>/dev/null | grep -v -- '-signed.ipa$' | head -1)
-[ -n "$UNSIGNED" ] || { echo "no se generó la .ipa"; exit 1; }
+[ -n "$UNSIGNED" ] || { echo "error: no .ipa was produced"; exit 1; }
 IPA="${UNSIGNED%.ipa}-signed.ipa"
 
 # hatch estampa un SDK y un Xcode que no existen; se sustituyen por los reales antes
@@ -65,8 +65,8 @@ d = open(sys.argv[1], "rb").read()
 i = d.find(b"\xf5\xf5\xdc\xdc")
 feat = d[i + 52:i + 400].split(b"\0")[0].decode() if i >= 0 else ""
 if " ios " not in f" {feat} " or " compressed-pointers" in f" {feat}":
-    sys.exit(f"el snapshot Dart no es de iOS: '{feat}'")
-print(">> snapshot Dart:", feat)
+    sys.exit(f"error: Dart snapshot is not an iOS snapshot: {feat}")
+print("Dart snapshot:", feat)
 PY
 python3 /out/41-stamp.py "$BUNDLE_APP" /root/iospoc/iossdk/iPhoneOS26.2.sdk \
   /out/vendor/xcode-version.plist /out/vendor/macos-SystemVersion.plist || exit 1
@@ -81,11 +81,11 @@ ents = plistlib.load(open(w + "/profile.plist", "rb"))["Entitlements"]
 plistlib.dump(ents, open(w + "/entitlements.plist", "wb"))
 PY
 /root/iospoc/rcodesign/rcodesign sign --p12-file "$SIG/cert.p12" --p12-password "$PW" \
-  --entitlements-xml-file "$WORK/entitlements.plist" "$BUNDLE_APP" || exit 1
+  --entitlements-xml-file "$WORK/entitlements.plist" "$BUNDLE_APP" 2>&1 | tidy || exit 1
 rm -f "$IPA"
 ( cd "$WORK" && zip -qX -r "$IPA" Payload ) || exit 1
 rm -rf "$WORK"
 
-hatch ios validate --ipa "$IPA" || exit 1
+hatch ios validate --ipa "$IPA" 2>&1 | tidy || exit 1
 cp -f "$IPA" /out/out/
-echo ">> $IPA"
+echo "signed: $IPA"

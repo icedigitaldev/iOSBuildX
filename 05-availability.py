@@ -4,7 +4,7 @@ p = "/root/iospoc/iossdk/iPhoneOS26.2.sdk/usr/include/AvailabilityInternal.h"
 s = open(p, encoding="utf-8", errors="surrogateescape").read()
 marker = "/* hatch no-op shim */"
 if marker in s:
-    print("ya estaba")
+    print("availability shim already present")
 else:
     s += (
         "\n" + marker + "\n#if 0\n"
@@ -14,4 +14,4 @@ else:
         "#endif\n"
     )
     open(p, "w", encoding="utf-8", errors="surrogateescape", newline="").write(s)
-    print("shim anadido")
+    print("availability shim added")

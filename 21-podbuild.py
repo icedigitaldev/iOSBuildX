@@ -442,12 +442,12 @@ def main():
         json.dump({"targets": {k: {"ok": v[0], "objects": v[1]} for k, v in results.items()},
                    "warnings": warnings, "bundles": BUND}, f, indent=2)
     good = sum(1 for v in results.values() if v[0])
-    print("\n=== %d/%d pods compilados ===" % (good, len(results)))
+    print("\n%d/%d pods built" % (good, len(results)))
     for w in warnings:
-        print("WARN", w)
+        print("warning:", w)
     bad = [k for k, v in results.items() if not v[0]]
     if bad:
-        print("FALLARON:", bad)
+        print("failed:", bad)
     return 1 if bad else 0
 
 

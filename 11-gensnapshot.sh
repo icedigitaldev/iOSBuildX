@@ -9,7 +9,7 @@ OUTBIN=${OUTBIN:-$PWD/gen_snapshot-ios}
 
 REV=$(curl -fsSL "https://raw.githubusercontent.com/flutter/flutter/$FLUTTER/DEPS" \
   | awk -F"'" '$2 == "dart_revision" && !r {r = $4} END {print r}')
-[ -n "$REV" ] || { echo "no encuentro dart_revision para Flutter $FLUTTER"; exit 1; }
+[ -n "$REV" ] || { echo "error: dart_revision not found for Flutter $FLUTTER"; exit 1; }
 
 shallow() {
   [ "$(git -C "$1" rev-parse HEAD 2>/dev/null)" = "$3" ] && return

@@ -8,6 +8,6 @@ cd "$APP" || exit 1
 t0=$(date +%s)
 hatch ios build --bundle-id "$BUNDLE" --name "$NAME" > /out/out/build.log 2>&1
 rc=$?
-echo "=== rc=$rc  $(($(date +%s)-t0))s ==="
+echo "exit code $rc, $(($(date +%s)-t0))s"
 tail -25 /out/out/build.log
 exit $rc

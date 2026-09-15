@@ -58,7 +58,7 @@ def main():
     if bundle:
         apps = [a for a in apps if a["attributes"]["bundleId"] == bundle]
     if not apps:
-        sys.exit("no hay ninguna app con ese bundle id en App Store Connect")
+        sys.exit("error: no app with that bundle id in App Store Connect")
 
     for app in apps:
         builds = get("/builds", tok, **{"filter[app]": app["id"], "limit": "20"})["data"]
@@ -67,18 +67,18 @@ def main():
             sys.exit(1 if taken else 0)
 
         print("%s  (%s)" % (app["attributes"]["name"], app["attributes"]["bundleId"]))
-        print("  versiones publicadas:")
+        print("  App Store versions:")
         for v in get("/apps/%s/appStoreVersions" % app["id"], tok)["data"][:10]:
             a = v["attributes"]
             print("    %-10s %-22s %s" % (a["versionString"], a["appStoreState"],
                                           (a.get("createdDate") or "")[:10]))
-        print("  builds subidos:")
+        print("  builds:")
         for b in builds:
             a = b["attributes"]
             print("    %-8s %-12s %s" % (a.get("version"), a.get("processingState"),
                                          (a.get("uploadedDate") or "")[:16]))
         if not builds:
-            print("    (ninguno)")
+            print("    (none)")
 
 
 main()

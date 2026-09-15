@@ -18,4 +18,4 @@ git config --global --add safe.directory /opt/flutter
 flutter --version
 flutter config --no-analytics || true
 flutter precache --no-android --no-ios --no-web --no-linux --no-windows --no-macos --no-fuchsia || true
-echo "=== BASE OK ==="
+echo "base packages installed"

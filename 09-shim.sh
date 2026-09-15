@@ -14,4 +14,4 @@ esac
 exec python3 "$@"
 SHIM
 chmod +x /usr/local/bin/python
-echo "=== SHIM OK ==="
+echo "pod build hook installed"

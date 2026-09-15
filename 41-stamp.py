@@ -13,7 +13,7 @@ de LC_BUILD_VERSION de cada Mach-O con esa misma versión.
 import json, os, plistlib, struct, sys
 
 if len(sys.argv) != 5:
-    sys.exit(__doc__)
+    sys.exit("usage: 41-stamp.py <Runner.app> <iPhoneOS.sdk> <xcode-version.plist> <macos-SystemVersion.plist>")
 app, sdk, xcode_plist, macos_plist = sys.argv[1:]
 
 for p in (os.path.join(app, "Info.plist"),
@@ -21,7 +21,7 @@ for p in (os.path.join(app, "Info.plist"),
           os.path.join(sdk, "System/Library/CoreServices/SystemVersion.plist"),
           xcode_plist, macos_plist):
     if not os.path.isfile(p):
-        sys.exit("falta %s" % p)
+        sys.exit("error: missing %s" % p)
 
 settings = json.load(open(os.path.join(sdk, "SDKSettings.json")))
 sdk_sys = plistlib.load(open(os.path.join(sdk, "System/Library/CoreServices/SystemVersion.plist"), "rb"))

@@ -5,7 +5,7 @@
 set -uo pipefail
 source /out/env.sh
 
-[ -f /out/out/app.tar.gz ] || { echo "falta /out/out/app.tar.gz"; exit 1; }
+[ -f /out/out/app.tar.gz ] || { echo "error: missing /out/out/app.tar.gz"; exit 1; }
 mkdir -p "$APP"
 
 # lib y assets se reemplazan enteros para no arrastrar ficheros ya borrados;
@@ -34,4 +34,5 @@ if out != s:
 PY
 
 echo "{\"flutter\":\"$FLUTTER\"}" > "$APP/.fvmrc"
-cd "$APP" && flutter pub get 2>&1 | tail -3
+cd "$APP" || exit 1
+out=$(flutter pub get 2>&1) || { echo "$out"; exit 1; }
