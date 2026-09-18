@@ -59,6 +59,12 @@ WORK=$(mktemp -d)
 unzip -oq "$UNSIGNED" -d "$WORK" || exit 1
 BUNDLE_APP=$(ls -d "$WORK"/Payload/*.app | head -1)
 
+# Los recursos de los pods, antes de firmar: lo que entre despues de rcodesign
+# queda fuera de _CodeSignature y Apple rechaza el bundle. Sin esto el pod
+# enlaza pero no encuentra sus archivos al ejecutarse, y eso aborta el proceso
+# desde dentro del pod, sin pasar por Dart.
+python3 /out/31-resources.py "$BUNDLE_APP" || exit 1
+
 python3 - "$BUNDLE_APP/Frameworks/App.framework/App" <<'PY' || exit 1
 import sys
 d = open(sys.argv[1], "rb").read()

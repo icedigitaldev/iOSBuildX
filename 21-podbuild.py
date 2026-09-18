@@ -50,6 +50,7 @@ MOD = os.path.join(OUT, "mod")      # lo espera hatch; los modulos viven en los 
 OBJ = os.path.join(OUT, "obj")      # objetos: lo que enlaza hatch
 BLD = os.path.join(OUT, "podbuild")
 BUND = os.path.join(OUT, "bundles")
+RES = os.path.join(OUT, "resources")  # recursos sueltos del podspec (`resources`)
 
 CXX_EXT = (".cpp", ".cc", ".cxx")
 OBJCXX_EXT = (".mm",)
@@ -143,6 +144,20 @@ def device_slice(xcfw):
 
 # --------------------------------------------------------- fase 1: los frameworks
 
+def copy_resources(files, dest):
+    """Copia recursos declarados por un podspec a [dest]. Se conserva el nombre
+    y nada mas: quien los pide los busca por nombre en el bundle."""
+    for f in files:
+        if not os.path.exists(f):
+            continue
+        os.makedirs(dest, exist_ok=True)
+        dst = os.path.join(dest, os.path.basename(f))
+        if os.path.isdir(f):
+            shutil.copytree(f, dst, dirs_exist_ok=True)
+        else:
+            shutil.copy2(f, dst)
+
+
 def stage(target):
     """Monta <Modulo>.framework con los headers publicos, deja los privados en
     priv/ y copia los binarios de terceros. Devuelve (framework, n, archivos .a).
@@ -171,16 +186,12 @@ def stage(target):
                 archives.append(src)
 
         for bname, files in acc["resource_bundles"].items():
-            bdir = os.path.join(BUND, bname + ".bundle")
-            os.makedirs(bdir, exist_ok=True)
-            for f in files:
-                if not os.path.exists(f):
-                    continue
-                dst = os.path.join(bdir, os.path.basename(f))
-                if os.path.isdir(f):
-                    shutil.copytree(f, dst, dirs_exist_ok=True)
-                else:
-                    shutil.copy2(f, dst)
+            copy_resources(files, os.path.join(BUND, bname + ".bundle"))
+
+        # `resources` sin bundle: CocoaPods los deja en la raiz del .app, no
+        # dentro de un .bundle. Van aparte para que 31-resources.py sepa a
+        # donde copiar cada cosa.
+        copy_resources(acc["resources"], RES)
 
     if vendored:
         return os.path.join(FBFW, mod + ".framework"), 0, archives
@@ -440,7 +451,19 @@ def main():
 
     with open(os.path.join(OUT, "podbuild.json"), "w") as f:
         json.dump({"targets": {k: {"ok": v[0], "objects": v[1]} for k, v in results.items()},
-                   "warnings": warnings, "bundles": BUND}, f, indent=2)
+                   "warnings": warnings, "bundles": BUND, "resources": RES},
+                  f, indent=2)
+
+    # Donde quedo todo esto: hatch elige OUT y lo pasa por argumento, asi que
+    # 31-resources.py no puede deducirlo. Se deja la ruta en el directorio de
+    # intercambio en vez de cablear el layout interno de hatch en dos sitios.
+    try:
+        os.makedirs("/out/out", exist_ok=True)
+        with open("/out/out/podbuild-out.txt", "w") as f:
+            f.write(OUT + "\n")
+    except OSError:
+        pass  # corriendo a mano fuera de la VM: quien llame pasa OUT
+
     good = sum(1 for v in results.values() if v[0])
     print("\n%d/%d pods built" % (good, len(results)))
     for w in warnings:
