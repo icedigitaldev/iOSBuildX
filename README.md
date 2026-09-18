@@ -128,6 +128,24 @@ python3 /out/50-asc.py
 
 La versión sale del `pubspec.yaml`: `version: 0.8.6+21` → versión 0.8.6, build 21.
 
+Subir no es publicar: Apple procesa el build después, y a veces se atasca. Por eso
+`--publish` no termina en la subida, espera a que quede `VALID` y dice en qué acabó.
+
+| Sale con | Qué pasó |
+|---|---|
+| 0 | procesado, ya se puede instalar desde TestFlight |
+| 1 | Apple lo rechazó; el motivo llega por correo |
+| 2 | no lo procesó a tiempo |
+
+Un build atascado **no aparece** en la API —no sale `PROCESSING`, es que no existe como
+recurso—, así que desde fuera no hay forma de distinguirlo de uno que va lento. Pasado el
+plazo, lo que toca es subir el siguiente número: un build no se puede borrar ni reintentar
+con el mismo. El plazo son 20 minutos; `ASC_WAIT_MINUTES` lo cambia.
+
+```bash
+python3 /out/50-asc.py --wait 21    # esperar a uno ya subido
+```
+
 ## Los scripts
 
 | | |

@@ -37,6 +37,17 @@ IPA=$(ls -t "$APP"/build/ios/hatch/*-signed.ipa | head -1)
 if [ "$PUBLISH" = 1 ]; then
   step "Upload"
   hatch ios publish --ipa "$IPA" 2>&1 | tidy || exit 1
+
+  # Subir no es publicar: Apple procesa despues y a veces se atasca sin avisar.
+  # Sin esto te quedas mirando la web sin saber si esperar o subir otro numero.
+  step "Wait for App Store Connect"
+  BUNDLE=$BUNDLE python3 /out/50-asc.py --wait "$BUILD"
+  case $? in
+    0) ;;
+    1) exit 1 ;;
+    2) echo "sube el siguiente build: edita version en pubspec.yaml y repite"
+       exit 1 ;;
+  esac
 fi
 
 echo
