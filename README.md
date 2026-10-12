@@ -187,5 +187,6 @@ firmando algo distinto de lo que compilaste.
 ## Más
 
 - [ARQUITECTURA.md](ARQUITECTURA.md) — cómo está armado y por qué cada decisión.
+- [PLAN.md](PLAN.md) - lo que falta y de dónde sacarlo (xtool como referencia).
 - [CREDITOS.md](CREDITOS.md) — de quién es cada pieza.
 - [LICENSE](LICENSE) — MIT.
